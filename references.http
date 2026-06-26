@@ -1,0 +1,51 @@
+### Cadastrar Peça
+POST http://localhost:3000/api/v1/pecas
+Content-Type: application/json
+
+{
+  "codigo_identificacao": "AMORT-TR-001",
+  "nome": "Amortecedor Traseiro Ranger",
+  "descricao": "Amortecedor a gás para Ford Ranger 2018+",
+  "categoria": "Suspensão",
+  "preco_custo": 350.50,
+  "preco_venda": 580.00,
+  "quantidade_estoque": 10,
+  "estoque_minimo": 2
+}
+
+### Listar Todas as Peças
+GET http://localhost:3000/api/v1/pecas
+
+### Buscar Peça Específica (Mude o número "1" para o ID da peça que deseja)
+GET http://localhost:3000/api/v1/pecas/1
+
+### Atualizar Estoque e Preço de uma Peça (Mude o "1" para o ID desejado)
+PUT http://localhost:3000/api/v1/pecas/1
+Content-Type: application/json
+
+{
+  "preco_custo": 360.00,
+  "preco_venda": 600.00,
+  "quantidade_estoque": 15,
+  "estoque_minimo": 0
+}
+
+### Deletar uma Peça (Cuidado, vai apagar do banco!)
+DELETE http://localhost:3000/api/v1/pecas/1
+
+---
+
+### Cadastrar Novo Cliente e Veículo
+POST http://localhost:3000/api/v1/clientes
+Content-Type: application/json
+
+{
+  "nome": "João Pedro Pereira Pires",
+  "telefone": "48999999998",
+  "cpf_cnpj": "12345678999",
+  "modelo_veiculo": "Ford Ranger XLT 2020",
+  "placa_veiculo": "ABC-4321"
+}
+
+### Listar Todos os Clientes
+GET http://localhost:3000/api/v1/clientes
