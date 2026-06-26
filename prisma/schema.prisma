@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// O restante do arquivo (enums e models) continua igual!
+
+enum Perfil {
+  ADMINISTRADOR
+  ATENDENTE_MECANICO
+}
+
+enum StatusOS {
+  AGUARDANDO_PECA
+  EM_CONSERTO
+  FINALIZADA
+  CANCELADA
+}
+
+enum TipoMovimentacao {
+  ENTRADA
+  VENDA_DIRETA
+  USO_OS
+}
+
+// ==========================================
+// MODELOS / TABELAS
+// ==========================================
+
+model Usuario {
+  id         Int            @id @default(autoincrement())
+  nome       String
+  email      String         @unique
+  senha_hash String
+  perfil     Perfil
+  
+  ordens_servico OrdemServico[]
+
+  @@map("usuarios")
+}
+
+model Cliente {
+  id             Int            @id @default(autoincrement())
+  nome           String
+  telefone       String
+  cpf_cnpj       String?        // Adicionado para emissão de Nota Fiscal
+  modelo_veiculo String         // Apenas para registrar o carro atual do cliente
+  placa_veiculo  String         // Apenas para registrar o carro atual do cliente
+  
+  ordens_servico OrdemServico[]
+
+  @@map("clientes")
+}
+
+model Peca {
+  id                 Int                   @id @default(autoincrement())
+  codigo_identificacao String                @unique // SKU ou Código de Barras para gerar as "Notas de Identificação"
+  nome               String
+  descricao          String?
+  categoria          String?
+  preco_custo        Float
+  preco_venda        Float
+  quantidade_estoque Int                   @default(0)
+  estoque_minimo     Int                   @default(0)
+  
+  movimentacoes      MovimentacaoEstoque[]
+
+  @@map("pecas")
+}
+
+model OrdemServico {
+  id                 Int                   @id @default(autoincrement())
+  descricao_problema String
+  status             StatusOS              @default(AGUARDANDO_PECA)
+  data_abertura      DateTime              @default(now())
+  data_fechamento    DateTime?
+  
+  // Campos para Nota Fiscal da Oficina
+  nota_fiscal_numero String?               @unique
+  nota_fiscal_emitida Boolean              @default(false)
+  
+  cliente_id         Int
+  cliente            Cliente               @relation(fields: [cliente_id], references: [id], onDelete: Cascade)
+  
+  usuario_id         Int
+  usuario            Usuario               @relation(fields: [usuario_id], references: [id])
+  
+  movimentacoes      MovimentacaoEstoque[]
+
+  @@map("ordens_servico")
+}
+
+model MovimentacaoEstoque {
+  id             Int              @id @default(autoincrement())
+  tipo_movimento TipoMovimentacao
+  quantidade     Int
+  data_movimento DateTime         @default(now())
+  
+  // Campo para Nota Fiscal de Venda Direta (Balcão)
+  nota_fiscal_numero String?        @unique
+  
+  peca_id        Int
+  peca           Peca             @relation(fields: [peca_id], references: [id], onDelete: Cascade)
+  
+  os_id          Int?
+  os             OrdemServico?    @relation(fields: [os_id], references: [id], onDelete: SetNull)
+
+  @@map("movimentacoes_estoque")
+}
